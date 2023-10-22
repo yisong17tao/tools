@@ -4,27 +4,46 @@
 #include <sys/user.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
-int main(int argc, char *argv[])
+void PrintHelp()
 {
-    if (argc < 2) {
+    printf("This is a tool using ptrace!");
+}
+
+int comline(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
         printf("Usage: %s <command> [args...]\n", argv[0]);
+        return 0;
+    }
+    else if (strcmp(argv[1], "-h") || strcmp(argv[1], "--help") == 0)
+    {
+        PrintHelp();
         return 1;
     }
+}
 
+pid_t Create_Child_And_Ptrace(char *argv[])
+{
     pid_t child;
     long orig_rax;
     struct user_regs_struct regs;
 
     child = fork();
-    if (child == 0) {
-        // 子进程
+    if (child == 0)
+    {
+        // child process
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         execvp(argv[1], &argv[1]);
-    } else {
+    }
+    else
+    {
         // 父进程
         wait(NULL);
-        while (1) {
+        while (1)
+        {
             ptrace(PTRACE_SYSCALL, child, NULL, NULL);
             wait(NULL);
             ptrace(PTRACE_GETREGS, child, NULL, &regs);
@@ -34,6 +53,11 @@ int main(int argc, char *argv[])
             printf("System call number: %ld\n", orig_rax);
         }
     }
+    return child;
+}
+
+int main(int argc, char *argv[])
+{
 
     return 0;
 }

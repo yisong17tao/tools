@@ -15,4 +15,4 @@ for line in lines:
 
 with open('syscall_list.txt', 'w') as file:
     for syscall_name, syscall_number in syscall_dict.items():
-        file.write(f"{syscall_name},{syscall_number}\n")
+        file.write(f"{syscall_name}\n")
